@@ -30,6 +30,7 @@ type Configure struct {
 // Receiver resprensent
 type Receiver struct {
 	Sender gomail.Sender
+	Dialer *gomail.Dialer
 	From   string
 }
 
@@ -40,12 +41,9 @@ func New(conf Configure) *Receiver {
 
 	d := gomail.NewDialer(conf.Host, conf.Port, conf.UserName, conf.Password)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-	s, err := d.Dial()
-	if err != nil {
-		panic(err)
-	}
+
 	res := &Receiver{
-		Sender: s,
+		Dialer: d,
 		From:   conf.From,
 	}
 	return res
@@ -65,7 +63,12 @@ func (r *Receiver) SendEmail(p *Model) error {
 	m.SetHeader("Subject", p.Subject)
 	m.SetBody("text/html", p.Body)
 
-	if err := gomail.Send(r.Sender, m); err != nil {
+	s, err := r.Dialer.Dial()
+	if err != nil {
+		return err
+	}
+
+	if err := gomail.Send(s, m); err != nil {
 		return err
 	}
 	m.Reset()
