@@ -1,6 +1,7 @@
 package email
 
 import (
+	"crypto/tls"
 
 	"gopkg.in/gomail.v2"
 )
@@ -16,30 +17,36 @@ type Model struct {
 	CC      string
 	BCC     string
 }
+
+// Configure email
 type Configure struct {
 	Host     string
 	Port     int
 	UserName string
 	Password string
-	From string
+	From     string
 }
+
+// Receiver resprensent
 type Receiver struct {
 	Sender gomail.Sender
-	From string
+	From   string
 }
+
 /*
 New init parameter
 */
 func New(conf Configure) *Receiver {
 
 	d := gomail.NewDialer(conf.Host, conf.Port, conf.UserName, conf.Password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	s, err := d.Dial()
 	if err != nil {
 		panic(err)
 	}
 	res := &Receiver{
 		Sender: s,
-		From: conf.From,
+		From:   conf.From,
 	}
 	return res
 }
