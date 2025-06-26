@@ -1,4 +1,4 @@
-module github.com/onskycloud/email
+module github.com/SkycareOnskyHealth/email
 
 go 1.13
 
